@@ -1,0 +1,46 @@
+{
+  "name": "aDuana",
+  "version": "1.0.0",
+  "description": "The line between the web and the permaweb",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "arweave",
+    "web3",
+    "blockchain"
+  ],
+  "author": "Miguel Angel Gordian",
+  "license": "MIT",
+  "dependencies": {
+    "@hapi/boom": "^8.0.1",
+    "@hapi/hapi": "^18.4.0",
+    "@hapi/vision": "^5.5.4",
+    "@postlight/mercury-parser": "^2.2.0",
+    "article-parser": "^4.1.1",
+    "arweave": "^1.6.0",
+    "axios": "^0.19.0",
+    "cron": "^1.7.2",
+    "domino": "^2.1.4",
+    "dompurify": "^2.0.7",
+    "ejs": "^3.0.1",
+    "handlebars": "^4.5.3",
+    "inline-source": "^7.1.0",
+    "jsdom": "^15.2.1",
+    "mongodb": "^3.3.5",
+    "natural": "^0.6.3",
+    "page-metadata-parser": "^1.1.4",
+    "posthtml": "^0.12.0",
+    "posthtml-inline-assets": "^3.0.0",
+    "puppeteer": "^2.0.0",
+    "readability": "https://github.com/mozilla/readability",
+    "readability-nodejs": "^0.0.2",
+    "reading-time": "^1.2.0",
+    "rss-parser": "^3.7.3",
+    "sentiment": "^5.0.2",
+    "stopword": "^0.3.4",
+    "url-parse": "^1.4.7",
+    "yargs": "^15.0.2"
+  }
+}

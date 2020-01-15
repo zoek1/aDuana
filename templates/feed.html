@@ -1,0 +1,396 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width,initial-scale=1,minimal-ui" name="viewport">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/vue-material/dist/vue-material.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/vue-material/dist/theme/default.css">
+
+    <style>
+        .title {
+            font-size: 3em !important;
+            letter-spacing: 1px !important;
+            line-height: 1.1em !important;
+            color: #333;
+        }
+
+        .url {
+            font-size: 1.8em !important;
+            padding-top: 23px !important;
+            line-height: 2.4em !important;
+            padding-bottom: 23px !important;
+        }
+
+        @media (min-width: 800px) {
+            .responsive-card {
+                padding: 3em 5em !important;
+            }
+
+            .container {
+                padding-left: 8%;
+                padding-right: 8%;
+            }
+        }
+
+        .content-card {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chip {
+            margin-top: 5px;
+        }
+
+
+
+    </style>
+</head>
+
+<body style="height: 100%">
+<div id="app">
+    <md-app>
+        <md-app-toolbar class="md-primary" :style="'background-color:' + sentimentRate" md-alignment="space-between">
+
+            <div class="md-toolbar-row">
+                <div class="md-toolbar-section-start">
+                    <span class="md-title">Relevant - The Permanent Aggregator</span>
+                </div>
+
+                <div class="md-toolbar-section-end">
+                    <a href="/">
+                    <md-button>
+                       <md-icon>add</md-icon>  Add your site
+                    </md-button>
+                    </a>
+                    <a href="/permafeed">
+                    <md-button> <md-icon>rss_feed</md-icon> PermaFeed</md-button></a>
+                </div>
+
+            </div>
+        </md-app-toolbar>
+    </md-app>
+
+    <div>
+        <form style="height: 30vh" novalidate class="md-layout md-alignment-center-space-around" @submit.prevent="validateFeed">
+            <md-card class="md-layout-item md-size-70 md-small-size-100">
+                <md-card-content>
+                    <md-field :class="getValidationClass('feed')">
+                        <label for="feed">URL Feed</label>
+                        <md-input type="url" class='url' name="feed" id="feed" v-model="form.feed" :disabled="sending" />
+                    </md-field>
+                    <md-button type="submit" class="md-raised md-primary" :disabled="sending">Search</md-button>
+                    <md-chip md-clickable v-on:click.native="() => setQuery(today)"  class="chip">Today</md-chip>
+                    <md-chip md-clickable v-on:click.native="() => setQuery('blockchain')"  class="chip">Blockchain</md-chip>
+                    <md-chip md-clickable v-on:click.native="() => setQuery('cryptocurrency')"  class="chip">Cryptocurrency</md-chip>
+                    <md-chip md-deletable v-on:click.native="() => setQuery('')"  class="chip">Clear</md-chip>
+                    <md-divider style="margin-top: 5px; margin-bottom: 5px"></md-divider>
+                    What color means? <label style="color: #AAAAAA"> No sentiment data </label> |
+                    <label style="color: #00BCD4"> Posivite </label> |
+                    <label style="color: #455A64"> Neutal </label> |
+                    <label style="color: #E91E63"> Negative </label>
+                    <md-progress-bar md-mode="indeterminate" v-if="sending" />
+                </md-card-content>
+            </md-card>
+        </form>
+    </div>
+
+    <div class="md-layout container md-alignment-top-space-around">
+        <entry v-for="tx in txs.slice(0, 26)" v-bind:rate="setRate" v-bind:query="setQuery" v-bind:key="tx" v-bind:tx="tx"></entry>
+    </div>
+
+    <!-- Your code here -->
+</div>
+
+<script src="https://unpkg.com/vue"></script>
+<script src="https://unpkg.com/vue-material"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/vuelidate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/validators.min.js"></script>
+<!-- Specific version, minified -->
+<script src="https://unpkg.com/arweave/bundles/web.bundle.min.js"></script>
+<script>
+  const arweave = Arweave.init({
+    host: 'arweave.net',// Hostname or IP address for a Arweave host
+    port: 443,          // Port
+    protocol: 'https',  // Network protocol http or https
+    timeout: 20000,     // Network request timeouts in milliseconds
+    logging: false,     // Enable network request logging
+  });
+  console.log(arweave);
+  arweave.network.getInfo().then(console.log);
+
+
+  Vue.use(VueMaterial.default);
+  Vue.use(window.vuelidate.default);
+
+  let app = Vue.component('entry', {
+    props: ['tx', 'query', 'rate'],
+    data: () => ({
+        content: {},
+        headers: {},
+        localRate: null,
+    }),
+    computed: {
+      sentiment() {
+        if (this.localRate !== null && this.localRate !== undefined) {
+          if (this.localRate > 0) return '#00BCD4';
+          if (this.localRate === 0) return '#455A64';
+          return '#E91E63'
+        }
+        return '#AAAAAA';
+      }
+    },
+    mounted() {
+      let self = this;
+      arweave.transactions.get(this.tx).then(transaction => {
+        console.log(transaction.get('signature'));
+        self.content = JSON.parse(transaction.get('data', {decode: true, string: true}));
+        self.headers = transaction.get('tags').reduce((obj, tag) => {
+          let key = tag.get('name', {decode: true, string: true});
+          obj[key] = tag.get('value', {decode: true, string: true});
+          if (key === 'sentiment_rate') {
+            this.localRate = obj[key];
+            this.rate(this.localRate);
+          }
+          return obj;
+        }, {});
+      });
+    },
+    template: ('<md-card class="md-layout-item md-size-30 md-small-size-100 content-card md-with-hover">\n' +
+      '      <md-card-header>\n' +
+      '        <md-card-header-text>\n' +
+      '          <div class="md-title">{{content.title }}</div>\n' +
+      '            <i v-if="localRate !== null"><md-icon>{{ this.localRate > 0 ? "mood" : this.localRate < 0 ? "mood_bad" : "flag"  }}</md-icon> {{(((localRate) * 10) / .5 ).toFixed(2)}}% sentiment rate</i>\n' +
+      '          <div class="md-subhead">{{content["dc:creator"]}}</div>\n' +
+      '          <i class="md-subhead" @click="() => query(headers.date)">{{headers.date}}</i>\n' +
+      '        <md-divider v-bind:style="\'height: 2px; margin-top: 5px; background-color: \'+sentiment"></md-divider>\n' +
+      '        </md-card-header-text>\n' +
+      '      </md-card-header>\n' +
+      '      <md-card-media v-if="content.enclosure">\n' +
+      '        <img v-bind:src="content.enclosure.url">\n' +
+      '      </md-card-media>' +
+      '      <md-card-content>\n' +
+      '        {{content.description || content.contentSnippet}}\n' +
+      '        <md-chip md-clickable v-on:click.native="() => query(headers.category_0)" class="chip" v-if="headers.category_0">{{headers.category_0}}</md-chip>\n' +
+      '        <md-chip md-clickable v-on:click.native="() => query(headers.category_1)"  class="chip" v-if="headers.category_1">{{headers.category_1}}</md-chip>\n' +
+      '        <md-chip md-clickable v-on:click.native="() => query(headers.category_2)"  class="chip" v-if="headers.category_2">{{headers.category_2}}</md-chip>\n' +
+      '        <md-chip md-clickable v-on:click.native="() => query(headers.category_3)"  class="chip" v-if="headers.category_3">{{headers.category_3}}</md-chip>\n' +
+      '        <md-chip md-clickable v-on:click.native="() => query(headers.category_4)"  class="chip" v-if="headers.category_4">{{headers.category_4}}</md-chip>\n' +
+      '      </md-card-content>\n' +
+      '      <md-card-expand>\n' +
+      '      <md-card-actions md-alignment="space-between">\n' +
+      '          <div>\n' +
+      '            <a v-bind:href="\'https://viewblock.io/arweave/tx/\' + tx"><md-button><md-icon>layers</md-icon></md-button></a>\n' +
+      '          </div><div>' +
+      '        <md-button><a :href="content.link"><md-icon>link</md-icon> Read now!</a></md-button>\n' +
+      '            <md-card-expand-trigger v-if="content.content || content[\'content:encoded\']">\n' +
+      '            <md-button class="md-icon-button">\n' +
+      '              <md-icon>keyboard_arrow_down</md-icon>\n' +
+      '            </md-button> Preview\n' +
+      '          </md-card-expand-trigger></div>' +
+      '      </md-card-actions>\n' +
+      '      <md-card-expand-content>\n' +
+      '          <md-card-content v-if="content.content || content[\'content:encoded\']">\n' +
+      '            <div v-html="content.content ||content[\'content:encoded\']">{{content.content || content[\'content:encoded\']}}</div>' +
+      '          </md-card-content>\n' +
+      '      </md-card-expand-content>      ' +
+      '      </md-card-expand>\n' +
+      '    </md-card>')
+  });
+
+  new Vue({
+    el: '#app',
+    mixins: [vuelidate.validationMixin],
+    data: () => ({
+      form: {
+        feed: null,
+      },
+      sending: false,
+      message: '',
+      status: 0,
+      txs: [],
+      rate: null
+    }),
+    async mounted ()  {
+      this.txs = await arweave.arql({
+        op: "and",
+        expr1: {
+          op: "equals",
+          expr1: "from",
+          expr2: "Qq-wNSAIRjNpfQ2qLK6Deb34GsmsKM3orz0kLgYXUxY"
+        },
+        expr2: {
+            op: "equals",
+            expr1: "env",
+            expr2: "production"
+        }
+      });
+
+      console.log(this.txs);
+    },
+    validations: {
+      form: {
+        feed: {
+          required: validators.required,
+          // url: validators.url
+        }
+      }
+    },
+    computed: {
+      today: () => (new Date().toISOString().slice(0,10)),
+      sentimentRate:  {
+        get() {
+            if (this.rate === null) return'#448aff';
+            if (this.rate > 0) return '#00BCD4';
+            if (this.rate === 0) return '#455A64';
+            return '#E91E63'
+        },
+        set(value) {
+          console.log(value)
+            if (value === 'reset') {
+              this.rate = null;
+              return;
+            }
+            if (this.rate === null) this.rate = 0;
+            if (value !== 'NaN')		
+              this.rate += parseInt(value)
+        },
+      }
+    },
+    methods: {
+      setRate(value) {
+        this.sentimentRate = value;
+      },
+      getValidationClass (fieldName) {
+        const field = this.$v.form[fieldName]
+
+        if (field) {
+          return {
+            'md-invalid': field.$invalid && field.$dirty
+          }
+        }
+      },
+      setQuery (message) {
+        console.log(message)
+        this.$set(this.form, 'feed', message)
+        this.saveFeed()
+
+      },
+      clearForm () {
+        this.$v.$reset()
+        this.form.feed = null
+      },
+      async saveFeed () {
+        self.sending = true;
+        self = this;
+
+
+        if (this.form.feed !== '') {
+          this.sentimentRate = 'reset';
+
+          this.txs = await arweave.arql({
+            op: "and",
+            expr1: {
+              op: "equals",
+              expr1: "from",
+              expr2: "Qq-wNSAIRjNpfQ2qLK6Deb34GsmsKM3orz0kLgYXUxY"
+            },
+            expr2: {
+              op: "and",
+              expr1: {
+                op: "equals",
+                expr1: "env",
+                expr2: "production"
+              },
+              expr2: {
+                op: "or",
+                expr1: {
+                  op: "equals",
+                  expr1: 'url',
+                  expr2: this.form.feed,
+                },
+                expr2: {
+                  'op': 'or',
+                  expr1: {
+                    op: 'equals',
+                    expr1: 'date',
+                    expr2: this.form.feed
+                  },
+                  expr2: {
+                    op: "or",
+                    expr1: {
+                      op: "equals",
+                      expr1: 'category_0',
+                      expr2: this.form.feed,
+                    },
+                    expr2: {
+                      'op': 'or',
+                      expr1: {
+                        op: 'equals',
+                        expr1: 'category_1',
+                        expr2: this.form.feed
+                      },
+                      expr2: {
+                        op: "or",
+                        expr1: {
+                          op: "equals",
+                          expr1: 'category_2',
+                          expr2: this.form.feed,
+                        },
+                        expr2: {
+                          'op': 'or',
+                          expr1: {
+                            op: 'equals',
+                            expr1: 'category_3',
+                            expr2: this.form.feed
+                          },
+                          expr2: {
+                            op: 'equals',
+                            expr1: 'category_4',
+                            expr2: this.form.feed
+                          }
+                        }
+                      }
+                    }
+                      }
+                }
+              }
+
+            }
+          });
+
+          self.sending = false
+        }
+        else {
+          this.sentimentRate = 'reset';
+          this.txs = await arweave.arql({
+            op: "and",
+            expr1: {
+              op: "equals",
+              expr1: "from",
+              expr2: "Qq-wNSAIRjNpfQ2qLK6Deb34GsmsKM3orz0kLgYXUxY"
+            },
+            expr2: {
+              op: "equals",
+              expr1: "env",
+              expr2: "production"
+            }
+          });
+          self.sending = false
+        }
+
+
+      },
+      validateFeed () {
+        this.$v.$touch()
+
+        if (!this.$v.$invalid) {
+          this.saveFeed()
+
+        }
+      }
+    }
+  })
+</script>
+</body>
+</html>

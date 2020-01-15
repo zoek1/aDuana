@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width,initial-scale=1,minimal-ui" name="viewport">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/vue-material/dist/vue-material.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/vue-material/dist/theme/default.css">
+
+    <style>
+        .title {
+            font-size: 3em !important;
+            letter-spacing: 1px !important;
+            line-height: 1.1em !important;
+            color: #333;
+        }
+
+        .url {
+            font-size: 1.8em !important;
+            padding-top: 23px !important;
+            line-height: 2.4em !important;
+            padding-bottom: 23px !important;
+        }
+
+        @media (min-width: 800px) {
+            .responsive-card {
+                padding: 3em 5em !important;
+            }
+        }
+    </style>
+</head>
+
+<body style="height: 100%">
+<div id="app">
+    <md-app>
+        <md-app-toolbar class="md-primary">
+
+            <div class="md-toolbar-row">
+                <div class="md-toolbar-section-start">
+                    <span class="md-title">Relevant - The Permanent Aggregator</span>
+                </div>
+
+                <div class="md-toolbar-section-end">
+                    <a href="/">
+                        <md-button>
+                            <md-icon>add</md-icon>  Add your site
+                        </md-button>
+                    </a>
+                    <a href="/permafeed">
+                        <md-button> <md-icon>rss_feed</md-icon> PermaFeed</md-button></a>
+                </div>
+
+            </div>
+        </md-app-toolbar>
+
+
+    </md-app>
+
+    <div >
+        <form style="height: 70vh" novalidate class="md-layout md-alignment-center-space-around" @submit.prevent="validateFeed">
+            <md-card class="md-layout-item md-size-70 md-small-size-100 responsive-card">
+                <md-card-header>
+                    <div class="md-title title">Your site to the <br/><strong>permanent world!</strong></div>
+                    <p>Enter your site to allow your content being indexed to Arweave.</p>
+                </md-card-header>
+
+                <md-card-content>
+                    <md-field :class="getValidationClass('feed')">
+                        <label for="feed">URL Feed</label>
+                        <md-input type="url" class='url' name="feed" id="feed" v-model="form.feed" :disabled="sending" />
+
+                    </md-field>
+                    <md-progress-bar md-mode="indeterminate" v-if="sending" />
+
+                    <span class="md-error" v-if="!$v.form.feed.required && !$v.siteSaved">* The feed is required</span>
+                </md-card-content>
+
+                <md-card-actions>
+
+                    <span v-if="message">{{ message }}</span>
+                    <md-button type="submit" class="md-raised md-primary" :disabled="sending">Save your site</md-button>
+
+                </md-card-actions>
+                <span style="display: block">* Your stories will appear at <a href="/permafeed">/permafeed</a> when they have at least 10 confirmations, so take a coffee in the meantime.</span>
+            </md-card>
+            <md-snackbar :md-active.sync="siteSaved">Status: {{ message }}</md-snackbar>
+        </form>
+    </div>
+
+    <!-- Your code here -->
+</div>
+
+<script src="https://unpkg.com/vue"></script>
+<script src="https://unpkg.com/vue-material"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/vuelidate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/validators.min.js"></script>
+<script>
+  Vue.use(VueMaterial.default)
+  Vue.use(window.vuelidate.default)
+
+  new Vue({
+    el: '#app',
+    mixins: [vuelidate.validationMixin],
+    watch: {
+        message: function (val) {
+            return this.lastSite + ' : ' + val;
+      }
+    },
+    data: () => ({
+      form: {
+        feed: null,
+      },
+      lastSite: '',
+      siteSaved: false,
+      sending: false,
+      message: '',
+      status: 0
+    }),
+    validations: {
+      form: {
+        feed: {
+          required: validators.required,
+          // url: validators.url
+        }
+      }
+    },
+    methods: {
+      getValidationClass (fieldName) {
+        const field = this.$v.form[fieldName]
+
+        if (field) {
+          return {
+            'md-invalid': field.$invalid && field.$dirty
+          }
+        }
+      },
+      clearForm () {
+        this.$v.$reset()
+        this.form.feed = null
+      },
+      saveFeed () {
+        this.lastSite = this.form.feed
+        this.sending = true
+        self = this;
+        fetch('/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ site: this.form.feed })
+        }).then(function (response) {
+            self.status = response.status
+            return response.json()
+        }).then(function (data) {
+          self.message = data.message
+          self.siteSaved = true
+          self.sending = false
+          self.clearForm()
+        }).catch(function(e) {
+          self.status = e.status
+          self.message = e.message
+          console.log(e)
+          self.sending = false
+        });
+      },
+      validateFeed () {
+        this.$v.$touch()
+
+        if (!this.$v.$invalid) {
+          this.saveFeed()
+
+        }
+      }
+    }
+  })
+</script>
+</body>
+</html>
