@@ -1,0 +1,61 @@
+body{
+  margin: 0;
+  background: #eee;
+}
+
+.card{
+  padding: 10px;
+}
+
+.btn{
+  margin-top: 10px;
+}
+
+.fixed-action-btn{
+  z-index: 0;
+}
+
+.section2{
+  margin: 10px;
+  display: inline-block;
+  padding-right: 30px;
+  padding-left: 30px;
+}
+
+.collapsible-body {
+  background: white;
+
+}
+
+@media (max-width: 700px) {
+  .section2{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cancel{
+    height: 20px;
+    padding-top: 0px;
+  }
+}
+
+h3{
+  font-size: 1.5em;
+}
+
+.page-footer{
+  bottom: 0px;
+  position: absolute;
+  z-index: 0;
+  left: 0px;
+  right: 0;
+}
+
+.cancel{
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 30px;
+  background: transparent;
+  border: none;
+  padding: 0;
+}

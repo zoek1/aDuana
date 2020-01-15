@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <link rel="stylesheet" href="css/style.css">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  </head>
+
+  <body>
+    <div class="container">
+
+        <form>
+          <div class="row card">
+            <div class="input-field col s12 m9 l10">
+              <input id="input_text" type="text">
+              <label for="input_text">Search</label>
+            </div>
+            <a class="waves-effect waves-light btn">Search</a>
+          </div>
+        </form>
+
+      <section>
+        <ul class="collapsible">
+          <li>
+            <div class="collapsible-header"><i class="material-icons">unfold_more</i>Filter</div>
+            <div class="collapsible-body">
+
+              <div class="section2">
+                <a class='dropdown-trigger btn' href='#' data-target='dropdown1'>Drop Me 1!</a>
+                <ul id='dropdown1' class='dropdown-content'>
+                  <li><a href="#!">one</a></li>
+                  <li><a href="#!">two</a></li>
+                  <li class="divider" tabindex="-1"></li>
+                  <li><a href="#!">three</a></li>
+                  <li><a href="#!"><i class="material-icons">view_module</i>four</a></li>
+                  <li><a href="#!"><i class="material-icons">cloud</i>five</a></li>
+                </ul>
+              </div>
+
+              <div class="section2">
+                <a class='dropdown-trigger btn' href='#' data-target='dropdown2' data-toggle="dropdown">Drop Me 2!</a>
+                <ul id='dropdown2' class='dropdown-content'>
+                  <li><a href="#!">one</a></li>
+                  <li><a href="#!">two</a></li>
+                  <li class="divider" tabindex="-1"></li>
+                  <li><a href="#!">three</a></li>
+                  <li><a href="#!"><i class="material-icons">view_module</i>four</a></li>
+                  <li><a href="#!"><i class="material-icons">cloud</i>five</a></li>
+                </ul>
+              </div>
+
+              <div class="section2">
+                <a class='dropdown-trigger btn' href='#' data-target='dropdown3'>Drop Me 3!</a>
+                <ul id='dropdown3' class='dropdown-content'>
+                  <li><a href="#!">one</a></li>
+                  <li><a href="#!">two</a></li>
+                  <li class="divider" tabindex="-1"></li>
+                  <li><a href="#!">three</a></li>
+                  <li><a href="#!"><i class="material-icons">view_module</i>four</a></li>
+                  <li><a href="#!"><i class="material-icons">cloud</i>five</a></li>
+                </ul>
+              </div>
+
+              <div class="section2">
+                <form action="#">
+                  <p>
+                    <label><input type="checkbox"/><span>checkbox</span></label>
+                  </p>
+                </form>
+              </div>
+
+            </div>
+          </li>
+        </ul>
+      </section>
+
+
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large ">
+        <i class="large material-icons">save</i>
+      </a>
+    </div>
+
+
+    <section id='donation'>
+      <footer class="page-footer ">
+        <button class="cancel" onclick="ocultar()"> <i class="material-icons">cancel</i></button>
+        <div class="container">
+          <div class="row">
+            <div class="col l6 s12">
+              <p class="grey-text text-lighten-4">Donar a este proyecto</p>
+            </div>
+            <div class="col l4 offset-l2 s12">
+              <a class="waves-effect waves-light right btn">donate</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </section>
+
+
+    <!--JavaScript at end of body for optimized loading-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
