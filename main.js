@@ -12,7 +12,7 @@ const {initArweave, isTxSynced, dispatchTX} = require('./routines/arweave');
 const {parseRSSFeed, getEntriesSince} = require('./routines/feeds');
 const {sentimentRate} = require('./routines/analysis');
 const {getContentFromBrowser} = require("./routines/content");
-const {getContentEmbedded} = require("./routines/bundler")
+const {getContentEmbedded, getContentAndMetadataEmbedded} = require("./routines/bundler")
 
 const argv = require('yargs')
   .usage('Usage: $0 <command> [options]')
@@ -288,7 +288,7 @@ const init = async () => {
 
         let site = await sites.findOne({url: site_raw});
         if (site === null) {
-          let {resultArticle, resultMetadata} = await getContentEmbedded(site_raw, parser, format, engine);
+          let {resultArticle, resultMetadata} = await getContentAndMetadataEmbedded(site_raw, parser, format, engine);
 
           return {
             status: 'ok',

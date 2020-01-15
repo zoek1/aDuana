@@ -41,12 +41,14 @@ async function getContentFromBrowser(site, parser, format, engine){
   let resultArticle;
   let resultMetadata;
 
-  if (engine == 'simple' && (parser !== '' || parser !== 'readability')) {
+  if (engine == 'simple' && (parser !== '' && parser !== 'readability')) {
+    console.log('Simple Access')
     response = await axios.get(site);
     html = await response.data;
   }
 
   if (html === undefined) {
+    console.log('Browser access')
     // based on this snippet https://gist.github.com/MrOrz/fb48f27f0f21846d0df521728fda19ce
     browser = await puppeteer.launch();
     html = await browser.newPage();
@@ -80,7 +82,7 @@ async function getContentFromBrowser(site, parser, format, engine){
       resultArticle = {content: c.content, title: c.title, excerpt:c.excerpt}
       resultMetadata = await runnner(html, meta, retrieveMetadata, 'retrieveMetadata')
     }
-  }  if (parser == 'article-parser') {
+  } else if (parser == 'article-parser') {
     let c = await extract(site)
     if (engine == 'simple') {
       const doc = domino.createWindow(html).document;
@@ -99,6 +101,8 @@ async function getContentFromBrowser(site, parser, format, engine){
     let c = await runnner(html, readabilityJsStr, executor, 'executor');
     resultMetadata = await runnner(html, meta, retrieveMetadata, 'retrieveMetadata')
     if (format == 'text') {
+      resultArticle = {content: c.textContent, title: c.title, excerpt:c.excerpt}
+    } else {
       resultArticle = {content: c.content, title: c.title, excerpt:c.excerpt}
     }
 

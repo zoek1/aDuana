@@ -235,8 +235,34 @@ const getContentEmbedded = async (url, parser, format, engine) => {
 };
 
 
-const getContentAndMetadataEmbedded = async (url) => {
-  let {resultArticle, resultMetadata} = await getContentEmbedded();
+const getContentAndMetadataEmbedded = async (url, parser, format, engine) => {
+  let {resultArticle, resultMetadata} = await getContentEmbedded(url, parser, format, engine);
+
+  let content = await inlineSource(resultArticle.content, {
+    attribute: false,
+    compress: true,
+    saveRemote: false,
+    svgAsImage: true,
+    swallowErrors: true,
+    ignore: [],
+    handlers: [
+      (async (source, context) => {
+        if (!source.errors) {
+          source.errors = [];
+        }
+        if (!source.subResources) {
+          source.subResources = [];
+        }
+        if (source.type == 'image'){
+          return await importRemoteImages(resultArticle.content, source, context);
+        }
+        if (source.fileContent && !source.content && source.type == 'css') {
+          return await importCssUrls(resultArticle.content, source, context);
+        }
+      })
+    ]
+  })
+  resultArticle.content = content.html;
   if (resultMetadata.icon) {
     resultMetadata.iconData = (await downloadRemote(resultMetadata.icon)).toString('base64')
   }
