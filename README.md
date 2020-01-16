@@ -21,9 +21,6 @@ node main.js -w wallet.json -p 80 -H 0.0.0.0
 If you have some error with respect to insecure content I recommend use certbot and nginx to configure ssl certificates. Go this site for more details: https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx
 Also, you can open an issue in this repo to provide this configuration.
 
-**Run your instance and give them a thematic**
-My instance is focusing on stay relevant in the crypto ecosystem adding news sites, technical posts from arweave medium, gitcoin blog , and so on.
-
 
 ## Functionality
 
