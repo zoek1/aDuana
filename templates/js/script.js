@@ -10,6 +10,15 @@ function mostrar_filter(){
   document.getElementById('filter').style.display = 'flex';
 }
 
+function refresh_preview() {
+  var url = $('#input_text').val();
+  $('#preview').attr('src', document.location.origin + '/preview?site=' +url)
+
+  $("#preview").load(function() {
+    $(this).height( $(this).contents().find("body").height() );
+  });
+}
+
 $(document).ready(function() {
   $('.dropdown-trigger').dropdown();
 

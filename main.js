@@ -281,6 +281,19 @@ const init = async () => {
 
   server.route({
     method: 'GET',
+    path: '/migration',
+    handler: async (request, h) => {
+      try {
+        const address = await arweave.wallets.jwkToAddress(wallet);
+        const balance = await arweave.wallets.getBalance(address);
+
+        return h.view('preview', {address, balance});
+      } catch(e){console.log(e)}
+    }
+  });
+
+  server.route({
+    method: 'GET',
     path: '/preview',
     handler: async (request, h) => {
       try{
