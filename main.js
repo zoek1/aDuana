@@ -148,10 +148,17 @@ const buildTxData = async (next) => {
     let favicon =  await collection.findOne({url: next.metadata.icon});
     let image = await collection.findOne({url: next.metadata.image});
     let metadata = {
-      ...next.metadata,
-      icon: `https://arweave.net/${favicon.tx}`,
-      image: `https://arweave.net/${image.tx}`,
+      ...next.metadata
     };
+
+    if (favicon !== null) {
+      metadata.icon = `https://arweave.net/${favicon.tx}`
+    }
+
+    if (image !== null) {
+      metadata.image = `https://arweave.net/${image.tx}`
+    }
+
     let data = {
       parser: next.item.parser,
       mode: next.item.mode,
@@ -480,26 +487,41 @@ const init = async () => {
           let {resultArticle, resultMetadata} = await getContentAndMetadataEmbedded(site_raw, parser, format, engine);
           let stats = readingTime(resultArticle.content)
 
-          var favicon = { _id: null };
-          var thumbnail = { _id: null };
+          let thumbnail_id;
+          let icon_id;
 
-          if (resultMetadata.icon) {
+          let icon = await sites.findOne({url: resultMetadata.icon});
+          if (icon !== null) {
+            console.log('reusing id for icon')
+            icon_id = icon._id
+          } else if (resultMetadata.icon) {
             let icon = await downloadRemote(resultMetadata.icon)
-            favicon = await sites.insertOne(await build_document({
-              url: resultMetadata.icon,
-              data: icon.data.toString('base64'),
-              type: icon.data.type || "image/x-icon",
-              ref: site_raw
-            }));
+            if (icon.data.toString().length > 0) {
+              let favicon = await sites.insertOne(await build_document({
+                url: resultMetadata.icon,
+                data: icon.data.toString('base64'),
+                type: icon.data.type || "image/x-icon",
+                ref: site_raw
+              }));
+              icon_id = favicon.ops[0]._id
+            }
           }
-          if (resultMetadata.image) {
+
+          let i = await sites.findOne({url: resultMetadata.image});
+          if (i !== null) {
+            console.log('reusing id for thumbnail')
+            thumbnail_id = i._id
+          } else if (resultMetadata.image) {
             let image = await downloadRemote(resultMetadata.image);
-            thumbnail = await sites.insertOne(await build_document({
-              url: resultMetadata.image,
-              data: image.data.toString('base64'),
-              type: image.data.type || "image/jpeg",
-              ref: site_raw
-            }));
+            if (image.data.toString().length > 0) {
+              let thumbnail = await sites.insertOne(await build_document({
+                url: resultMetadata.image,
+                data: image.data.toString('base64'),
+                type: image.data.type || "image/jpeg",
+                ref: site_raw
+              }));
+              thumbnail_id = thumbnail.ops[0]._id
+            }
           }
 
           const new_site = await sites.insertOne(await build_document({
@@ -516,8 +538,8 @@ const init = async () => {
             engine,
             data: resultArticle,
             resultMetadata,
-            favicon: favicon.ops[0]._id,
-            image: thumbnail.ops[0]._id
+            favicon: icon_id,
+            image: thumbnail_id
           }));
           console.log(new_site.ops[0]._id)
           let link = '/status?id=' + new_site.ops[0]._id;

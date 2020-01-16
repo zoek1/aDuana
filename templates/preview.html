@@ -43,12 +43,19 @@
   <nav class="grey darken-4">
     <div class="nav-wrapper container">
       <a href="/" class="brand-logo">aDuana</a>
+      <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
       <ul id="nav-mobile" class="right hide-on-med-and-down">
-        <li><a href="/">Store your page</a></li>
-        <li><a href="/activity">Activity</a></li>
+        <li class="active"><a href="/"><i class="material-icons left">add</i>Store your page</a></li>
+        <li><a href="/activity"><i class="material-icons left">insert_chart</i>Activity</a></li>
       </ul>
     </div>
   </nav>
+
+  <ul class="sidenav" id="mobile-demo">
+    <li class="active"><a href="/"><i class="material-icons left">add</i>Store your page</a></li>
+    <li><a href="/activity"><i class="material-icons left">insert_chart</i>Activity</a></li>
+  </ul>
+
     <div class="card" style="margin: 0; padding: 0;">
       <div class="row" style="margin: 0">
 
@@ -122,7 +129,7 @@
 
 
       <div class="fixed-action-btn"  style="z-index: 1000; ">
-      <a id="save" class="deep-orange darken-1 btn-floating btn-large tooltipped" data-position="left" data-tooltip="Save site">
+      <a class="deep-orange darken-1 btn-floating btn-large tooltipped modal-trigger" href="#modal1" data-position="left" data-tooltip="Save site">
         <i class="large material-icons">save</i>
       </a>
     </div>
@@ -138,6 +145,20 @@
     bottom: 0;
     z-index: 99;
 ">
+
+      <!-- Modal Structure -->
+      <div id="modal1" class="modal">
+        <div class="modal-content">
+          <h4 class="deep-orange-text text-darken-3 ">Disclosure</h4>
+          <p>Do you agree that you are responsible for the content that will archive and should not archive copyrighted
+            content that they do not own?</p>
+        </div>
+        <div class="modal-footer">
+          <a href="#!" class="modal-close waves-effect waves-green btn-flat">DISAGREE</a>
+          <a id="save"  href="#!" class="modal-close waves-effect waves-red btn-flat">AGREE</a>
+        </div>
+      </div>
+
       <footer class="page-footer grey darken-4">
         <div class="container">
 
@@ -161,6 +182,7 @@
     <script type="application/javascript">
       <%- include('js/script.js'); %>
       $('select').formSelect();
+      $('.modal').modal();
 
     </script>
   </body>

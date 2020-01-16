@@ -134,14 +134,7 @@ iframe {
 #font-utils tr:first-child span {
   display: block;
 }
-#font-utils tr:first-child span:first-child {
-  font-size: 62px;
-}
-#font-utils tr:first-child span:last-child {
-  margin-top: -4px;
-  color: #666;
-  font-size: 12px;
-}
+
 #font-utils tr:last-child td div {
   display: flex;
   font-size: 14px;

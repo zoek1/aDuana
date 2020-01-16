@@ -1,4 +1,5 @@
 const Axios = require('axios');
+var cloudscraper = require('cloudscraper');
 
 const context = require('inline-source/lib/context');
 const parse = require('inline-source/lib/parse');
@@ -65,6 +66,7 @@ const build = async (entry, options) => {
           source.subResources = [];
         }
         if (source.type == 'image'){
+
           return await importRemoteImages(entry, source, context, logger);
         }
         if (source.fileContent && !source.content && source.type == 'css') {
@@ -95,6 +97,7 @@ const importRemoteImages = async (entry, source, context, logger) => {
       const response = await downloadRemote(source.sourcepath);
       source.fileContent = response.data;
     } catch (error) {
+      console.log(error)
       source.errored = true;
       source.errors.push({
         message: `${error.message}`,
@@ -189,6 +192,12 @@ async function downloadRemote(url) {
     responseType: 'arraybuffer'
   });
 
+  // console.log(response)
+  // if (response.headers.server == 'cloudflare') {
+  //  throw new Error('Cloudfare is blocking the resource')
+  // }
+
+
   return {
     data: response.data,
     type: response.headers['content-type']
@@ -247,6 +256,7 @@ const getContentAndMetadataEmbedded = async (url, parser, format, engine) => {
     ignore: [],
     handlers: [
       (async (source, context) => {
+
         if (!source.errors) {
           source.errors = [];
         }

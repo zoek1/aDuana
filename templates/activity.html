@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="static/reset.css" rel="stylesheet">
+
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+<body>
+<nav class="grey darken-4">
+    <div class="nav-wrapper container">
+        <a href="/" class="brand-logo">aDuana</a>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="/"><i class="material-icons left">add</i>Store your page</a></li>
+            <li class="active"><a href="/activity"><i class="material-icons left">insert_chart</i>Activity</a></li>
+        </ul>
+    </div>
+</nav>
+
+
+<ul class="sidenav" id="mobile-demo">
+    <li><a href="/"><i class="material-icons left">add</i>Store your page</a></li>
+    <li class="active"><a href="/activity"><i class="material-icons left">insert_chart</i>Activity</a></li>
+</ul>
+<div class="container">
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs">
+                <li class="tab col s6"><a class="active" href="#pending">Waiting Confirmation</a></li>
+                <li class="tab col s6"><a href="#approved">Approved</a></li>
+            </ul>
+        </div>
+        <div id="approved" class="col s12">
+
+            <% for (i=0; i < approved.length; i++) {%>
+            <div class="row">
+                <div class="col s12 m8 push-m2">
+                    <div class="card ">
+                        <div class="card-stacked">
+                            <div class="card-content">
+                                <h5 class="card-title activator"><%= approved[i].site.title %><i class="material-icons right">more_vert</i></h5>
+                                <div>
+                                    <em><i style="vertical-align: middle;" class="material-icons">book</i> <%= approved[i].stats.text %></em>
+                                    <em><i style="vertical-align: middle;" class="material-icons">insert_emoticon</i> <%= approved[i].metadata.sentiment_group %></em>
+                                </div>
+                                <p class=""><%= approved[i].site.description %></p>
+                                <label><a class="center-align " href="<%= approved[i].site.link %>"><%= approved[i].site.link %></a></label>
+                            </div>
+                            <div class="card-action">
+                                <a href="/status?id=<%= approved[i]._id %>"><i style="vertical-align: middle;" class="material-icons">insert-link</i> TxStatus</a>
+                                <% if (approved[i].published === true) {%>
+                                <a href="https://arweave.net/<%= approved[i].tx %>"><i style="vertical-align: middle;" class="material-icons">insert-link</i>Pemanent Post</a>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="card-reveal">
+                            <span class="card-title"><i class="material-icons right">close</i></span>
+                            <%- approved[i].item.data.content %>
+                        </div>
+                        <div class="card-image  waves-effect waves-block waves-light">
+                            <img style="object-fit: cover;" class="activator" src="<%= approved[i].metadata.image %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        <div id="pending" class="col s12">
+
+            <% for (i=0; i < pending.length; i++) {%>
+            <div class="row">
+                <div class="col s12 m8 push-m2">
+                    <div class="card ">
+                        <div class="card-stacked">
+                            <div class="card-content">
+                                <h5 class="card-title activator"><%= pending[i].site.title %><i class="material-icons right">more_vert</i></h5>
+                                <div>
+                                    <em><i style="vertical-align: middle;" class="material-icons">book</i> <%= pending[i].stats.text %></em>
+                                    <em><i style="vertical-align: middle;" class="material-icons">insert_emoticon</i> <%= pending[i].metadata.sentiment_group %></em>
+                                </div>
+                                <p class=""><%= pending[i].site.description %></p>
+                                <label><a class="center-align " href="<%= pending[i].site.link %>"><%= pending[i].site.link %></a></label>
+                            </div>
+                            <div class="card-action">
+                                <a href="/status?id=<%= pending[i]._id %>"><i style="vertical-align: middle;" class="material-icons">insert-link</i> TxStatus</a>
+                            </div>
+                        </div>
+                        <div class="card-reveal">
+                            <span class="card-title"><i class="material-icons right">close</i></span>
+                            <%- pending[i].item.data.content %>
+                        </div>
+                        <div class="card-image  waves-effect waves-block waves-light">
+                            <img style="object-fit: cover;" class="activator" src="<%= pending[i].metadata.image %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+
+
+    </div>
+</div>
+
+<div class="fixed-action-btn">
+    <a href="/" class="btn-floating btn-large red tooltipped" data-position="left" data-tooltip="Add new site">
+        <i class="large material-icons">add</i>
+    </a>
+</div>
+
+<section id='donation' style="
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    z-index: 99;
+">
+    <footer class="page-footer grey darken-4">
+        <div class="container">
+
+
+            <div class="row" style="margin-bottom: 0px; padding-bottom: 20px">
+
+                <p style="display: inline-block" class="grey-text text-lighten-4"><i class="material-icons" onclick="ocultar()">cancel</i> Help to make this proyect sustainable, consider donate to <%= address %>!</p>
+
+
+                <a href="https://viewblock.io/arweave/address/<%= address %>" class="waves-effect waves-light orange darken-4 right btn">donate</a>
+            </div>
+        </div>
+    </footer>
+</section>
+
+
+<!--JavaScript at end of body for optimized loading-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script src="static/js/script.js" type="application/javascript"></script>
+</body>
+</html>

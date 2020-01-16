@@ -82,5 +82,5 @@ $(document).ready(function() {
   $('.collapsible').collapsible();
   $('#save').on('click', save_page)
   $('.tooltipped').tooltip();
-
+  $('.sidenav').sidenav();
 });

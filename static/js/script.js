@@ -7,4 +7,5 @@ $(document).ready(function() {
   $('.materialboxed').materialbox();
   $('.fixed-action-btn').floatingActionButton();
   $('.tooltipped').tooltip();
+  $('.sidenav').sidenav();
 });
