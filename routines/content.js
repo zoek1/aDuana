@@ -9,6 +9,8 @@ const {
 } = require('article-parser');
 const domino = require('domino');
 const puppeteer = require('puppeteer');
+const {sentimentRate} = require('./analysis');
+
 const fs = require('fs');
 const readabilityJsStr = fs.readFileSync('node_modules/readability/Readability.js', {encoding: 'utf-8'})
 const meta = fs.readFileSync('static/page-metadata-parser.bundle.js', {encoding: 'utf-8'})
@@ -110,7 +112,12 @@ async function getContentFromBrowser(site, parser, format, engine){
 
   if (engine == 'browser') { browser.close(); }
 
-  return {resultArticle, resultMetadata};
+  let lang = resultMetadata.language || "";
+
+  return {resultArticle, resultMetadata: {
+    ...resultMetadata,
+    ...(await sentimentRate(resultArticle.content, lang.toUpperCase() ))
+  }};
 }
 
 

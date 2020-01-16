@@ -1,19 +1,16 @@
+const path = require('path');
 const fs = require('fs');
 const parse = require('url-parse');
 const Hapi = require('@hapi/hapi');
 const mongo = require('mongodb').MongoClient;
 const CronJob = require('cron').CronJob;
-const crypto = require("crypto");
 const Boom = require('@hapi/boom')
 const readingTime = require('reading-time');
-const axios = require('axios');
+
 
 const {initArweave, isTxSynced, dispatchTX} = require('./routines/arweave');
-const {parseRSSFeed, getEntriesSince} = require('./routines/feeds');
-const {sentimentRate} = require('./routines/analysis');
-const {getContentFromBrowser} = require("./routines/content");
 const {getContentEmbedded, getContentAndMetadataEmbedded, downloadRemote} = require("./routines/bundler")
-
+const ejs = require('ejs')
 
 const config_js = fs.readFileSync('static/config.js', {encoding: 'utf-8'})
 const fontello_css = fs.readFileSync('static/fontello.css', {encoding: 'utf-8'})
@@ -70,11 +67,11 @@ const url = 'mongodb://localhost:27017';
 let client;
 let db;
 
-const APP_NAME = 'aDuana';
-const APP_VERSION = '1.0';
+const APP_NAME = 'aDuana-Test';
+const APP_VERSION = '0';
 
 const HOURLY = '0 0 */1 * * *';
-const MINUTES = '30 * * * * *';
+const MINUTES = '0 */2 * * * *';
 
 const getSiteDomain = (site_raw) => {
   console.log(site_raw)
@@ -94,7 +91,7 @@ const getSiteDomain = (site_raw) => {
 };
 
 
-const build_document = async ({page}) => {
+const build_document = (page) => {
   let doc;
   if (page.type === 'text/html') {
     doc = {
@@ -122,6 +119,7 @@ const build_document = async ({page}) => {
         favicon: page.favicon,
         image: page.thumbnail
       },
+      metadata: page.resultMetadata,
       url: page.url,
       pubDateObj: new Date(),
       published: false, tx: null
@@ -131,17 +129,55 @@ const build_document = async ({page}) => {
       url: page.url,
       ref: page.ref,
       item: page.data,
-      type: page.type
+      type: page.type,
+      pubDateObj: new Date(),
+      published: false, tx: null
     }
   }
 
   return doc
 };
 
-const buildTxData = (next) => {
+const buildTxData = async (next) => {
   console.log(next.url);
   if (next.type === 'text/html') {
-    return next.item.data.content
+    let favicon =  await collection.findOne({url: next.metadata.icon});
+    let image = await collection.findOne({url: next.metadata.image});
+    let metadata = {
+      ...next.metadata,
+      icon: `https://arweave.net/${favicon.tx}`,
+      image: `https://arweave.net/${image.tx}`,
+    };
+    let data = {
+      parser: next.item.parser,
+      mode: next.item.mode,
+      reset: next.item.reset,
+      libstyle: next.item.libstyle,
+      header: next.item.header,
+      format: next.item.format,
+      engine: next.item.engine,
+      data: next.item.data,
+
+      stats: next.stats,
+      // files to embed
+      config_js,
+      fontello_css,
+      index_css,
+      index_js,
+
+      content: next.item.data.content,
+      metadata: metadata,
+      author: resultMetadata.author || ""
+    };
+
+    let options = {
+      root:  path.join(__dirname, 'templates'),
+      async: true
+    };
+
+    let doc = ejs.render('template', data, options);
+    console.log(doc)
+    return doc;
   }
 
   return new Buffer(next.item, 'base64');
@@ -171,8 +207,8 @@ const buildTxTags = (next) => {
       'Content-Type': next.type,
       'Publication-Date': next.pubDateObj.toISOString().slice(0,10),
       'Publication-Time': next.pubDateObj.toISOString().slice(11,16),
-      'Publication-URL': next.url,
-      'Reference-Page': next.url
+      'Publication-URL': next.ref,
+      'Resource-URL': next.url
     }
   }
 
@@ -216,12 +252,13 @@ const start_jobs = async () => {
       console.log(next)
       console.log(`${next._id} : ${next.item.title}`);
 
-      let {response, tx} = await dispatchTX(arweave, buildTxData(next), buildTxTags(next), wallet)
+      let {response, tx} = await dispatchTX(arweave, await buildTxData(next), buildTxTags(next), wallet)
       console.log(response.data)
       if (response.status === 200) {
         console.log(`New pending transaction: ${tx.get('id')}`);
         collection.update({_id: next._id}, {$set: {'tx': tx.get('id'), published: false }})
       }
+
     }
   });
 
@@ -289,7 +326,7 @@ const init = async () => {
       try{
         let sites = db.collection('entries');
         let site_raw = request.query.site;
-        let parser = request.query.parser;
+        let parser = request.query.parser || 'readability';
         let mode = request.query.mode || 'sepia';
         let reset = request.query.reset === 'on';
         let libstyle = request.query.libstyle === 'on';
@@ -341,7 +378,7 @@ const init = async () => {
       try{
         let sites = db.collection('entries');
         let site_raw = request.query.site;
-        let parser = request.query.parser;
+        let parser = request.query.parser || 'readability';
         let format = request.query.format || 'html';
         let engine = request.query.engine || 'browser';
         let obj_site = parse(site_raw);
@@ -351,25 +388,16 @@ const init = async () => {
           return Boom.badData('Url format must be protocol://domain/path');
         }
 
-        let site = await sites.findOne({url: site_raw});
-        if (site === null) {
-          let {resultArticle, resultMetadata} = await getContentAndMetadataEmbedded(site_raw, parser, format, engine);
-          let stats = readingTime(resultArticle.content)
 
-          return {
-            status: 'ok',
-            data: resultArticle,
-            metadata: resultMetadata,
-            stats
-          };
-        } else {
-          console.log('** URL Saved');
+        let {resultArticle, resultMetadata} = await getContentAndMetadataEmbedded(site_raw, parser, format, engine);
+        let stats = readingTime(resultArticle.content)
 
-          return {
-            status: 'ok',
-            message: 'Site already exists'
-          };
-        }
+        return {
+          status: 'ok',
+          data: resultArticle,
+          metadata: resultMetadata,
+          stats
+        };
       } catch(e){
         console.log(e);
         return Boom.badImplementation(`${e}`);
@@ -412,7 +440,7 @@ const init = async () => {
             favicon = await sites.insertOne(build_document({
               url: resultMetadata.icon,
               data: icon.data.toString('base64'),
-              type: icon.data.type,
+              type: icon.data.type || "image/x-icon",
               ref: site_raw
             }));
           }
@@ -421,7 +449,7 @@ const init = async () => {
             thumbnail = await sites.insertOne(build_document({
               url: resultMetadata.image,
               data: image.data.toString('base64'),
-              type: image.data.type,
+              type: image.data.type || "image/jpeg",
               ref: site_raw
             }));
           }
@@ -440,21 +468,24 @@ const init = async () => {
             engine,
             data: resultArticle,
             resultMetadata,
-            favicon: favicon._id,
-            image: thumbnail._id
+            favicon: favicon.ops[0]._id,
+            image: thumbnail.ops[0]._id
           }));
-
+          console.log(new_site.ops[0]._id)
+          let link = 'https://generator.gordian.dev/status?id=' + new_site.ops[0]._id;
           return {
             status: 'ok',
-            message: 'The site will be available at https://generator.gordian.dev/redirect?id=' + new_site._id
+            message: `Wait until the page is mined, you see the progress here: <a href="${link}">${link}</a>"`,
+            url: link
           };
 
         }  else {
           console.log('** URL Saved');
-
+          let link = 'https://generator.gordian.dev/status?id=' + site._id;
           return {
             status: 'ok',
-            message: 'Site already exists'
+            message: `Site already exists, check status here: <a href="${link}">${link}</a>`,
+            url: link
           };
         }
 

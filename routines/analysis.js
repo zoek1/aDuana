@@ -17,24 +17,13 @@ function onlyUnique(value, index, self) {
 
 function sentimentGroup(rate) {
   console.log(`+++++++++ ${rate}`)
-  if (rate > 1) return 'Optimistic';
-  if (rate < -1) return 'Pessimistic';
+  if (rate > 0.05) return 'Optimistic';
+  if (rate < -0.05) return 'Pessimistic';
   return 'Neutral';
 }
 
-const sentimentRate = async (url, browser, lang) => {
+const sentimentRate = async (content, lang) => {
   natural.PorterStemmer.attach();
-  let content;
-
-  if (!browser) {
-    content = await getContent(url);
-  } else {
-    content = await getContentFromBrowser(url)
-  }
-
-  if (content === null) {
-    return 0;
-  }
 
   try {
     let _analyzer;
@@ -65,7 +54,7 @@ const sentimentRate = async (url, browser, lang) => {
       }
     }
 
-    sentences = new natural.SentenceTokenizer().tokenize(content.textContent);
+    sentences = new natural.SentenceTokenizer().tokenize(content);
 
     var accum = 0;
     for (let index=0; index < sentences.length; index++) {
@@ -80,6 +69,7 @@ const sentimentRate = async (url, browser, lang) => {
       sentiment_group: sentimentGroup(sentiment_rate),
     }
   } catch (e) {
+    console.log(e)
     return {
       sentiment_rate: 0,
       sentiment_tokens: [],

@@ -18,9 +18,9 @@ function refresh_preview() {
   }
   $('#preview').attr('src', document.location.origin + '/preview?site=' + url)
 
-  $("#preview").load(function() {
-    $(this).height( $(this).contents().find("body").height() );
-  });
+  // $("#preview").load(function() {
+  //  $(this).height( $(this).contents().find("body").height() );
+  // });
 }
 
 var expression = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
@@ -32,6 +32,7 @@ function save_page() {
     M.toast({html: 'URL invalid, please introduce one valid URL.'})
   }
   $.post(document.location.origin + '/request?site=' + url).done(function (response) {
+    console.log(response);
     M.toast({html: response.message})
   }).fail(function(e) {
     M.toast({
@@ -48,5 +49,5 @@ $(document).ready(function() {
   $('.fixed-action-btn').floatingActionButton();
 
   $('.collapsible').collapsible();
-  $('#save').click(save_page())
+  $('#save').on('click', save_page)
 });
