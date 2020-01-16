@@ -263,12 +263,12 @@ const getContentAndMetadataEmbedded = async (url, parser, format, engine) => {
     ]
   })
   resultArticle.content = content.html;
-  if (resultMetadata.icon) {
-    resultMetadata.iconData = (await downloadRemote(resultMetadata.icon)).toString('base64')
-  }
-  if (resultMetadata.image) {
-    resultMetadata.imageData = (await downloadRemote(resultMetadata.image)).toString('base64')
-  }
+  // if (resultMetadata.icon) {
+  //  resultMetadata.iconData = (await downloadRemote(resultMetadata.icon)).toString('base64')
+  // }
+  // if (resultMetadata.image) {
+  //  resultMetadata.imageData = (await downloadRemote(resultMetadata.image)).toString('base64')
+  // }
 
   return {resultArticle, resultMetadata};
 };
@@ -329,5 +329,6 @@ if (require.main === module) {
 
 module.exports = {
   getContentEmbedded,
-  getContentAndMetadataEmbedded
+  getContentAndMetadataEmbedded,
+  downloadRemote
 };
