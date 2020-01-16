@@ -16,11 +16,23 @@ function refresh_preview() {
     M.toast({html: 'URL invalid, please introduce one valid URL.'})
     return;
   }
-  $('#preview').attr('src', document.location.origin + '/preview?site=' + url)
+  query = {
+    site: url,
+    reset: document.getElementById('reset').checked ? "on" : 'off',
+    libstyle: document.getElementById('libstyle').checked ? "on" : 'off',
+    header: document.getElementById('header').checked ? "on" : 'off',
+    parser: document.getElementById('parser').value,
+    engine: document.getElementById('engine').value,
+    mode: document.getElementById('mode').value,
+    format: document.getElementById('format').value,
+  };
 
-  // $("#preview").load(function() {
+  $('#preview').attr('src', document.location.origin + '/preview?' + $.param( query ));
+  document.getElementById('loader').style.display = 'block';
+  document.getElementById("preview").onload = function() {
   //  $(this).height( $(this).contents().find("body").height() );
-  // });
+    document.getElementById('loader').style.display = 'none';
+  };
 }
 
 var expression = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
@@ -30,15 +42,23 @@ function save_page() {
   var url = $('#input_text').val();
   if (!url.match(regex)){
     M.toast({html: 'URL invalid, please introduce one valid URL.'})
+    return;
   }
+  document.getElementById('loader').style.display = 'block';
+
   $.post(document.location.origin + '/request?site=' + url).done(function (response) {
     console.log(response);
-    M.toast({html: response.message})
+    M.toast({
+      html: response.message,
+      displayLength: 10000
+    })
+    document.getElementById('loader').style.display = 'none';
   }).fail(function(e) {
     M.toast({
       html: response.message,
-      classes: 'red darken-1 rounded'
+      displayLength: 10000
   })
+    document.getElementById('loader').style.display = 'none';
     // alert('Something went wrong, try later!')
   })
 }

@@ -39,98 +39,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   </head>
 
-  <body style="overflow: hidden">
-    <div class="container">
+  <body style="overflow: auto">
+  <nav class="grey darken-4">
+    <div class="nav-wrapper container">
+      <a href="/" class="brand-logo">aDuana</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="/">Store your page</a></li>
+        <li><a href="/activity">Approved</a></li>
+      </ul>
+    </div>
+  </nav>
+    <div class="card" style="margin: 0; padding: 0;">
+      <div class="row" style="margin: 0">
 
-      <form>
-          <div class="row card">
-            <div class="input-field col s12 m9 l10">
-              <input id="input_text" type="text">
-              <label for="input_text">Search</label>
+        <div class="container">
+          <form>
+            <div>
+              <div class="input-field col s12 m9 l10">
+                <input id="input_text" type="text">
+                <label for="input_text">Search</label>
+              </div>
+              <a onclick="refresh_preview()" class="deep-orange darken-2 waves-effect waves-light btn">Preview</a>
             </div>
-            <a onclick="refresh_preview()" class="waves-effect waves-light btn">Search</a>
-          </div>
-        </form>
+            <br>
+            <ul class="collapsible" style="border: none;box-shadow: none; margin: 0; margin-top: 25px">
+              <li>
+                <label style="margin-left: 7px; margin-right: 7px; display: inline-block"><input id="reset" name="reset" type="checkbox" checked/><span>Reset styles</span></label>
+                <label style="margin-left: 7px; margin-right: 7px; display: inline-block"><input id="libstyle" name="libstyle" type="checkbox" checked/><span>Responsive</span></label>
+                <label style="margin-left: 7px; margin-right: 7px; display: inline-block"><input id="header" name="header" type="checkbox" checked/><span>Add Header</span></label>
+                <div class="collapsible-header" style="width: 80%">
+                  <div style="margin-left: 7px; margin-right: 7px;">Extra filters <i class="material-icons">arrow_drop_down</i></div>
+                </div>
+                <div class="collapsible-body" style="border-bottom: none">
 
-      <section>
-        <ul class="collapsible">
-          <li>
-            <div class="collapsible-header"><i class="material-icons">unfold_more</i>Filter</div>
-            <div class="collapsible-body">
+                  <div class="input-field col s12">
+                    <select name="parser" id="parser">
+                      <option value="readability" selected>Redability</option>
+                      <option value="mercury">Mercury</option>
+                      <option value="article-parser">Article Parser</option>
+                    </select>
+                    <label>Select Extractor</label>
+                  </div>
 
-              <div class="section2">
-                <a class='dropdown-trigger btn' href='#' data-target='dropdown1'>Drop Me 1!</a>
-                <ul id='dropdown1' class='dropdown-content'>
-                  <li><a href="#!">one</a></li>
-                  <li><a href="#!">two</a></li>
-                  <li class="divider" tabindex="-1"></li>
-                  <li><a href="#!">three</a></li>
-                  <li><a href="#!"><i class="material-icons">view_module</i>four</a></li>
-                  <li><a href="#!"><i class="material-icons">cloud</i>five</a></li>
-                </ul>
-              </div>
+                  <div class="input-field col s12">
+                    <select name="engine" id="engine">
+                      <option value="simple" selected>Request</option>
+                      <option value="browser">Browser</option>
+                    </select>
+                    <label>Select Engine</label>
+                  </div>
 
-              <div class="section2">
-                <a class='dropdown-trigger btn' href='#' data-target='dropdown2' data-toggle="dropdown">Drop Me 2!</a>
-                <ul id='dropdown2' class='dropdown-content'>
-                  <li><a href="#!">one</a></li>
-                  <li><a href="#!">two</a></li>
-                  <li class="divider" tabindex="-1"></li>
-                  <li><a href="#!">three</a></li>
-                  <li><a href="#!"><i class="material-icons">view_module</i>four</a></li>
-                  <li><a href="#!"><i class="material-icons">cloud</i>five</a></li>
-                </ul>
-              </div>
+                  <div class="input-field col s12">
+                    <select name="format" id="format">
+                      <option value="html" selected>HTML</option>
+                      <option value="text">Text</option>
+                    </select>
+                    <label>Format Content</label>
+                  </div>
 
-              <div class="section2">
-                <a class='dropdown-trigger btn' href='#' data-target='dropdown3'>Drop Me 3!</a>
-                <ul id='dropdown3' class='dropdown-content'>
-                  <li><a href="#!">one</a></li>
-                  <li><a href="#!">two</a></li>
-                  <li class="divider" tabindex="-1"></li>
-                  <li><a href="#!">three</a></li>
-                  <li><a href="#!"><i class="material-icons">view_module</i>four</a></li>
-                  <li><a href="#!"><i class="material-icons">cloud</i>five</a></li>
-                </ul>
-              </div>
+                  <div class="input-field col s12">
+                    <select name="mode" id="mode">
+                      <option value="" selected>Choose your option</option>
+                      <option value="dark">Dark</option>
+                      <option value="light">Light</option>
+                      <option value="sepia">Sepia</option>
+                      <option value="groove-dark">Groove Dark</option>
+                      <option value="solarized-light">Solarized Light</option>
+                      <option value="solarized-dark">Solarized Dark</option>
+                    </select>
+                    <label>Color Theme</label>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </form>
 
-              <div class="section2">
-                <form action="#">
-                  <p>
-                    <label><input type="checkbox"/><span>checkbox</span></label>
-                  </p>
-                </form>
-              </div>
-
-            </div>
-          </li>
-        </ul>
-      </section>
+        </div>
+      </div>
+      <div id="loader" style="display: none; margin: 0;" class="progress ">
+        <div class="deep-orange darken-3 indeterminate"></div>
+      </div>
 
 
       <div class="fixed-action-btn"  style="z-index: 1000; ">
-      <a id="save" class="btn-floating btn-large">
+      <a id="save" class="deep-orange darken-1 btn-floating btn-large">
         <i class="large material-icons">save</i>
       </a>
     </div>
     </div>
+
     <div style="--aspect-ratio: 16/9;">
       <iframe id='preview' src="" frameborder="0" style="width: 100%; height: 100vh" allowfullscreen></iframe>
     </div>
+
     <section id='donation' style="
     position: fixed;
     width: 100%;
-    bottom: 0;">
-      <footer class="page-footer ">
-        <button class="cancel" onclick="ocultar()"> <i class="material-icons">cancel</i></button>
+    bottom: 0;
+    z-index: 99;
+">
+      <footer class="page-footer grey darken-4">
         <div class="container">
-          <div class="row" style="margin-bottom: 0px;">
-            <div class="col l6 s12">
-              <p class="grey-text text-lighten-4">Donar a este proyecto</p>
-            </div>
-            <div class="col l4 offset-l2 s12">
-              <a class="waves-effect waves-light right btn">donate</a>
-            </div>
+
+
+          <div class="row" style="margin-bottom: 0px; padding-bottom: 20px">
+
+            <p style="display: inline-block" class="grey-text text-lighten-4"><i class="material-icons" onclick="ocultar()">cancel</i> Help to make this proyect sustainable, consider donate to <%= address %>!</p>
+
+
+            <a href="https://viewblock.io/arweave/address/<%= address %>" class="waves-effect waves-light orange darken-4 right btn">donate</a>
           </div>
         </div>
       </footer>
@@ -143,6 +160,8 @@
 
     <script type="application/javascript">
       <%- include('js/script.js'); %>
+      $('select').formSelect();
+
     </script>
   </body>
 </html>

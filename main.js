@@ -2,10 +2,13 @@ const path = require('path');
 const fs = require('fs');
 const parse = require('url-parse');
 const Hapi = require('@hapi/hapi');
+const ObjectId = require('mongodb').ObjectId;
 const mongo = require('mongodb').MongoClient;
 const CronJob = require('cron').CronJob;
 const Boom = require('@hapi/boom')
 const readingTime = require('reading-time');
+const htmlMinifier = require('@node-minify/html-minifier');
+const minify = require('@node-minify/core');
 
 
 const {initArweave, isTxSynced, dispatchTX} = require('./routines/arweave');
@@ -91,7 +94,7 @@ const getSiteDomain = (site_raw) => {
 };
 
 
-const build_document = (page) => {
+const build_document = async (page) => {
   let doc;
   if (page.type === 'text/html') {
     doc = {
@@ -140,6 +143,7 @@ const build_document = (page) => {
 
 const buildTxData = async (next) => {
   console.log(next.url);
+  let collection = db.collection('entries');
   if (next.type === 'text/html') {
     let favicon =  await collection.findOne({url: next.metadata.icon});
     let image = await collection.findOne({url: next.metadata.image});
@@ -152,7 +156,7 @@ const buildTxData = async (next) => {
       parser: next.item.parser,
       mode: next.item.mode,
       reset: next.item.reset,
-      libstyle: next.item.libstyle,
+      mini: next.item.libstyle,
       header: next.item.header,
       format: next.item.format,
       engine: next.item.engine,
@@ -164,23 +168,28 @@ const buildTxData = async (next) => {
       fontello_css,
       index_css,
       index_js,
+      mili,
 
       content: next.item.data.content,
       metadata: metadata,
-      author: resultMetadata.author || ""
+      author: metadata.author || ""
     };
 
     let options = {
       root:  path.join(__dirname, 'templates'),
-      async: true
+      async: true,
+      rmWhitespace: true
     };
 
-    let doc = ejs.render('template', data, options);
-    console.log(doc)
+    let doc = await ejs.renderFile('templates/template.html', data, options);
+    //let doc = await minify({
+    //  compressor: htmlMinifier,
+    //  content: _doc
+    //});
+    // console.log(doc)
     return doc;
   }
-
-  return new Buffer(next.item, 'base64');
+  return Buffer.from(next.item, 'base64');
 };
 
 const buildTxTags = (next) => {
@@ -271,6 +280,10 @@ const init = async () => {
     host: argv.host
   });
 
+  await server.register({
+    plugin: require('@hapi/inert')
+  })
+
   await server.register(require('@hapi/vision'));
   server.views({
     engines: {
@@ -278,19 +291,6 @@ const init = async () => {
     },
     relativeTo: __dirname,
     path: 'templates'
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/',
-    handler: async (request, h) => {
-      try {
-        const address = await arweave.wallets.jwkToAddress(wallet);
-        const balance = await arweave.wallets.getBalance(address);
-
-        return h.view('index', {address, balance});
-      } catch(e){console.log(e)}
-    }
   });
 
   server.route({
@@ -308,7 +308,27 @@ const init = async () => {
 
   server.route({
     method: 'GET',
-    path: '/migration',
+    path: '/status',
+    handler: async (request, h) => {
+      let collection = db.collection('entries');
+      const address = await arweave.wallets.jwkToAddress(wallet);
+      const balance = await arweave.wallets.getBalance(address);
+
+      try {
+        const id = request.query.id;
+        const obj = await collection.findOne({_id: new ObjectId(id)})
+
+        return h.view('status', {address, balance, obj: obj});
+      } catch(e){
+        console.log(e)
+        return h.view('status', {address, balance, obj: undefined});
+      }
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/',
     handler: async (request, h) => {
       try {
         const address = await arweave.wallets.jwkToAddress(wallet);
@@ -437,7 +457,7 @@ const init = async () => {
 
           if (resultMetadata.icon) {
             let icon = await downloadRemote(resultMetadata.icon)
-            favicon = await sites.insertOne(build_document({
+            favicon = await sites.insertOne(await build_document({
               url: resultMetadata.icon,
               data: icon.data.toString('base64'),
               type: icon.data.type || "image/x-icon",
@@ -446,7 +466,7 @@ const init = async () => {
           }
           if (resultMetadata.image) {
             let image = await downloadRemote(resultMetadata.image);
-            thumbnail = await sites.insertOne(build_document({
+            thumbnail = await sites.insertOne(await build_document({
               url: resultMetadata.image,
               data: image.data.toString('base64'),
               type: image.data.type || "image/jpeg",
@@ -454,7 +474,7 @@ const init = async () => {
             }));
           }
 
-          const new_site = await sites.insertOne(build_document({
+          const new_site = await sites.insertOne(await build_document({
             url: site_raw,
             site: getSiteDomain(site_raw),
             stats,
@@ -472,19 +492,19 @@ const init = async () => {
             image: thumbnail.ops[0]._id
           }));
           console.log(new_site.ops[0]._id)
-          let link = 'https://generator.gordian.dev/status?id=' + new_site.ops[0]._id;
+          let link = '/status?id=' + new_site.ops[0]._id;
           return {
             status: 'ok',
-            message: `Wait until the page is mined, you see the progress here: <a href="${link}">${link}</a>"`,
+            message: `Wait until the page is mined, <a href="${link}">you see the progress here</a>"`,
             url: link
           };
 
         }  else {
           console.log('** URL Saved');
-          let link = 'https://generator.gordian.dev/status?id=' + site._id;
+          let link = '/status?id=' + site._id;
           return {
             status: 'ok',
-            message: `Site already exists, check status here: <a href="${link}">${link}</a>`,
+            message: `<a href="${link}">Site already exists, check status here</a>`,
             url: link
           };
         }
@@ -496,6 +516,15 @@ const init = async () => {
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/static/{file*}',
+    handler: {
+      directory: {
+        path: 'static'
+      }
+    }
+  })
 
   client = await mongo.connect(url, {useNewUrlParser: true});
   db = client.db('aduana');

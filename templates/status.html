@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="static/reset.css" rel="stylesheet">
+
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+<body>
+<nav class="grey darken-4">
+    <div class="nav-wrapper container">
+        <a href="/" class="brand-logo">aDuana</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="/">Migrate your page</a></li>
+            <li><a href="/activity">Approved</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="container">
+    <% if (obj) {%>
+        <div>
+        <h3 class="center-align"><%= obj.site.title %></h3>
+        <% if (obj.tx == null || obj.published == false) {%>
+            <div class="center-align">
+                <div class="preloader-wrapper active">
+                <div class="spinner-layer spinner-red-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                    <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+                </div>
+            </div><br>
+                <label>Wait patiently while your page is mined!</label>
+            </div>
+            <% } else {%>
+            <div class="center-align">
+                <h6>Your site is deployed</h6>
+                <a href="https://arweave.net/<%= obj.tx %>" class="waves-effect waves-light btn-large deep-orange darken-2">Go for it! <i class="material-icons left">send</i>              </a>
+            </div>
+            <% } %>
+
+        <br>
+        <div class="col s12 m7">
+            <div class="card ">
+
+                <div class="card-stacked">
+                    <div class="card-content">
+                        <h5 class="card-title activator"><%= obj.site.description %><i class="material-icons right">more_vert</i></h5>
+                        <label><a class="center-align " href="<%= obj.site.link %>"><%= obj.site.link %></a></label><br>
+                    </div>
+                    <div class="card-action">
+                        <em><i style="vertical-align: middle;" class="material-icons">book</i> <%= obj.stats.text %></em>
+                        <em><i style="vertical-align: middle;" class="material-icons">insert_emoticon</i> <%= obj.metadata.sentiment_group %></em>
+                        <% if (obj.published === true) {%>
+                        <a class='disabled' href="https://arweave.net/<%= obj.tx %>"><i style="vertical-align: middle;" class="material-icons">insert-link</i>Link</a>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="card-reveal">
+                    <span class="card-title"><i class="material-icons right">close</i></span>
+                    <%- obj.item.data.content %>
+                </div>
+                <div class="card-image  waves-effect waves-block waves-light">
+                    <img class="activator" src="<%= obj.metadata.image %>">
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <% if (obj.published === true) {%>
+            <div class="center-align">
+                <a href="https://arweave.net/<%= obj.tx %>" class="waves-effect waves-light btn-large deep-orange darken-2">Go to your deployed post!</a>
+            </div>
+        <% } %>
+    <% } else { %>
+        <section class="center-align">
+            <h1>404</h1>
+            <h4>Nothing to see here, maybe the id is wrong</h4>
+            <img src="https://thumbs.gfycat.com/FailingDeterminedIbadanmalimbe.webp" alt="404">
+        </section>
+    <% } %>
+    </div>
+</div>
+
+<section id='donation' style="
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    z-index: 99;
+">
+    <footer class="page-footer grey darken-4">
+        <div class="container">
+
+
+            <div class="row" style="margin-bottom: 0px; padding-bottom: 20px">
+
+                <p style="display: inline-block" class="grey-text text-lighten-4"><i class="material-icons" onclick="ocultar()">cancel</i> Help to make this proyect sustainable, consider donate to <%= address %>!</p>
+
+
+                <a href="https://viewblock.io/arweave/address/<%= address %>" class="waves-effect waves-light orange darken-4 right btn">donate</a>
+            </div>
+        </div>
+    </footer>
+</section>
+
+
+<!--JavaScript at end of body for optimized loading-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script src="static/js/script.js" type="application/javascript"></script>
+</body>
+</html>
