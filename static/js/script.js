@@ -5,4 +5,6 @@ function ocultar(){
 $(document).ready(function() {
   M.AutoInit();
   $('.materialboxed').materialbox();
+  $('.fixed-action-btn').floatingActionButton();
+  $('.tooltipped').tooltip();
 });

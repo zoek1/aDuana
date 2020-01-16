@@ -238,7 +238,7 @@ const start_jobs = async () => {
   console.log(`Start jobs`);
 
   // Deploy next entry
-  let deployEntries = new CronJob(MINUTES, async function(){
+  let deploy = async function(){
     let collection = db.collection('entries');
     console.log(`== Check sincronization`);
     let last = await collection.findOne({published: false, tx: {$ne: null}});
@@ -247,10 +247,26 @@ const start_jobs = async () => {
       let synced = await isTxSynced(arweave, last.tx);
       console.log(synced.confirmed)
       console.log(`Transaction status: ${synced.status} - ${synced.confirmed}`);
-      if (synced.confirmed !== null && typeof  synced.confirmed === 'object' && synced.confirmed.number_of_confirmations > 1) {
+      if (synced.confirmed !== null && typeof  synced.confirmed === 'object' && synced.confirmed.number_of_confirmations > 2) {
         console.log(`Liberando: ${last.tx}`);
         collection.update({_id: last._id}, {$set: { published: true }})
+        deploy()
       }
+      if (synced.status == 404) {
+        if (last.errors == undefined || last.errors == null ) {
+          console.log('-- Estableciendo contador')
+          await collection.update({_id: last._id}, {$set: { errors: 0 }})
+        }
+        if (last.errors >= 15) {
+          console.log('-- Reintentado contador')
+          await collection.update({_id: last._id}, {$set: { errors: 0, tx: null}})
+          deploy()
+        } else {
+          console.error(`-- Incrementando contador de error ${last.errors}`)
+          await collection.update({_id: last._id}, {$inc: { errors: 1 }})
+        }
+      }
+
     } else {
       console.log(`== Select next entry`);
       let next = await db.collection('entries').findOne({tx: null});
@@ -258,10 +274,18 @@ const start_jobs = async () => {
         console.log('--- No task exists')
 	      return;
       }
-      console.log(next)
-      console.log(`${next._id} : ${next.item.title}`);
+      console.log(next._id)
+      // console.log(`${next._id} : ${next.item.title}`);
+      try {
+        res = await dispatchTX(arweave, await buildTxData(next), buildTxTags(next), wallet)
+        // console.log(response.data)
+      } catch(e) {
+        console.log(e)
+        console.error(`!! Failed ${next._id} : ${next.item.title}`);
+        return;
+      }
 
-      let {response, tx} = await dispatchTX(arweave, await buildTxData(next), buildTxTags(next), wallet)
+      let {response, tx} = res;
       console.log(response.data)
       if (response.status === 200) {
         console.log(`New pending transaction: ${tx.get('id')}`);
@@ -269,7 +293,8 @@ const start_jobs = async () => {
       }
 
     }
-  });
+  }
+  let deployEntries = new CronJob(MINUTES, deploy);
 
   deployEntries.start()
 };
@@ -300,8 +325,11 @@ const init = async () => {
       try {
         const address = await arweave.wallets.jwkToAddress(wallet);
         const balance = await arweave.wallets.getBalance(address);
+        let collection = db.collection('entries');
 
-        return h.view('feed', {address, balance});
+        let approved = await (collection.find({published: true, type: 'text/html'})).toArray()
+        let pending = await (collection.find({published: false, type: 'text/html'})).toArray()
+        return h.view('activity', {address, balance, approved, pending});
       } catch(e){console.log(e)}
     }
   });

@@ -46,7 +46,18 @@ function save_page() {
   }
   document.getElementById('loader').style.display = 'block';
 
-  $.post(document.location.origin + '/request?site=' + url).done(function (response) {
+  var query = {
+    site: url,
+    reset: document.getElementById('reset').checked ? "on" : 'off',
+    libstyle: document.getElementById('libstyle').checked ? "on" : 'off',
+    header: document.getElementById('header').checked ? "on" : 'off',
+    parser: document.getElementById('parser').value,
+    engine: document.getElementById('engine').value,
+    mode: document.getElementById('mode').value,
+    format: document.getElementById('format').value,
+  };
+
+  $.post(document.location.origin + '/request?' + $.param( query )).done(function (response) {
     console.log(response);
     M.toast({
       html: response.message,
@@ -70,4 +81,6 @@ $(document).ready(function() {
 
   $('.collapsible').collapsible();
   $('#save').on('click', save_page)
+  $('.tooltipped').tooltip();
+
 });
