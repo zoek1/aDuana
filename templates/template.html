@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="<%= metadata.language %>" xml:lang="<%= metadata.language %>">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name=viewport content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="<%= metadata.icon %>" />
+
+    <meta name="twitter:title" content="<%= metadata.title %>" />
+    <meta name="twitter:card" content="<%= metadata.description %>" />
+    <meta name="twitter:url" content="<%= metadata.url %>" />
+    <meta name="twitter:description" content="<%= metadata.description %>" />
+    <meta name="twitter:image" content="<%= metadata.image %>" />
+
+    <meta property="og:title" content="<%= metadata.title %>" />
+    <meta property="og:url" content="<%= metadata.url %>" />
+    <meta property="og:description" content="<%= metadata.description %>" />
+    <meta property="og:image" content="<%= metadata.image %>" />
+    <meta property="og:type" content="<%= metadata.type %>" />
+
+    <title><%= metadata.title %> :: Permanent Web</title>
+
+    <style>
+        <% if (reset) { %>
+            <%- include('css/reset.css'); %>
+        <% } %>
+
+
+
+        <% if (mini) { %>
+            <%- mili %>
+        <% } %>
+
+        <%- fontello_css %>
+        <%- index_css %>
+
+        @media only screen and  (min-width: 786px) {
+            .container {
+                margin-top: 3em;
+                margin-left: 10vw !important;
+                margin-right: 10vw !important;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+        body[data-mode="light"] {
+            color: var(--color-mode-light-color;
+            background-color: var(--color-mode-light-bg);
+        }
+        body[data-mode="dark"] {
+            color: var(--color-mode-dark-color);
+            background-color: var(--color-mode-dark-bg);
+        }
+        body[data-mode="sepia"] {
+            color: var(--color-mode-sepia-color);
+            background-color: var(--color-mode-sepia-bg);
+        }
+        body[data-mode="solarized-light"] {
+            color: var(--color-mode-solarized-light-color);
+            background-color: var(--color-mode-solarized-light-bg);
+        }
+        body[data-mode="groove-dark"] {
+            color: var(--color-mode-groove-dark-color);
+            background-color: var(--color-mode-groove-dark-bg);
+        }
+        body[data-mode="solarized-dark"] {
+            color: var(--color-mode-solarized-dark-color);
+            background-color: var(--color-mode-solarized-dark-bg);
+        }
+        body[data-loaded=true] {
+            transition: color 0.4s, background-color 0.4s;
+        }
+        body[data-images=false] img {
+            display: none;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        a {
+            color: #0095dd;
+            text-decoration: none;
+        }
+        #reader-domain {
+            font-family: Helvetica, Arial, sans-serif;
+            text-decoration: none;
+            border-bottom-color: currentcolor;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            display: inline-block;
+        }
+        #reader-domain>span:first-child {
+            font-size: 1.1em;
+        }
+        #reader-title {
+            font-size: 1.6em;
+            line-height: 1.25em;
+            width: 100%;
+            margin: 20px 0;
+            padding: 0;
+        }
+        #reader-credits {
+            font-size: 0.9em;
+            line-height: 1.48em;
+            margin: 0 0 10px 0;
+            padding: 0;
+            font-style: italic;
+        }
+        #reader-estimated-time {
+            font-size: 0.85em;
+            line-height: 1.48em;
+            margin: 0 0 10px 0;
+            padding: 0;
+        }
+        #reader-credits:empty {
+            disply: none;
+        }
+
+    </style>
+</head>
+<body <% if (mode !== 'none') {%> data-mode="<%= mode %>" <% } %> >
+<div id="toolbar">
+    <span class="icon-font" data-cmd="open-font-utils" title="Type controls"></span>
+    <div id="font-utils" tabindex="-1" class="hidden">
+        <table border="0" cellpadding="0" cellspacing="0">
+            <colgroup>
+                <col style="border-right: solid 1px #B5B5B5;" width=50%>
+                <col>
+            </colgroup>
+            <tr>
+                <td data-cmd="font-type-sans-serif"><span>Aa</span><span>Sans-serif</span></td>
+                <td data-cmd="font-type-serif"><span>Aa</span><span>Serif</span></td>
+            </tr>
+            <tr>
+                <td data-cmd="font-decrease"><span class="icon-minus"></span></td>
+                <td data-cmd="font-increase"><span class="icon-plus"></span></td>
+            </tr>
+            <tr>
+                <td data-id="full-width" data-cmd="full-width">
+                    <input id="full-width" type="checkbox"/>
+                    <label>Full Width</label>
+                </td>
+                <td>
+                    <div class="strech">
+                        <span class="icon-article-collapsed" data-cmd="line-height-type-1"></span>
+                        <span class="icon-article-expanded" data-cmd="line-height-type-2"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" data-id="color">
+                    <div>
+                        <span data-cmd="color-mode-light">Light</span>
+                        <span data-cmd="color-mode-sepia">Sepia</span>
+                        <span data-cmd="color-mode-solarized-light">Solarized</span>
+                    </div>
+                    <div>
+                        <span data-cmd="color-mode-dark">Dark</span>
+                        <span data-cmd="color-mode-groove-dark">Groove</span>
+                        <span data-cmd="color-mode-solarized-dark">Solarized</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="image-utils" tabindex="-1" class="hidden">
+        <table border="0" cellpadding="0" cellspacing="0">
+            <colgroup>
+                <col style="border-right: solid 1px #B5B5B5;" width=50%>
+                <col>
+            </colgroup>
+            <tr title="The +/- buttons only scale images with width greater than 32px. Scaling is not persistent operation. To reset, refresh the page.">
+                <td data-cmd="image-decrease"><span class="icon-minus"></span></td>
+                <td data-cmd="image-increase"><span class="icon-plus"></span></td>
+            </tr>
+            <tr>
+                <td data-cmd="image-hide">Hide</td>
+                <td data-cmd="image-show">Show</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="content" class="container">
+    <% if (header) { %>
+
+        <span></span> <!-- for IntersectionObserver -->
+        <h1 dir="auto" id="reader-title"><%= metadata.title %></h1>
+        <% if (author) { %>
+        Author: <em dir="auto" id="#reader-credits"><%= author %></em><br>
+        <% } %>
+        Reading Time: <em dir="auto" id="reader-estimated-time"><%= stats.text  %></em>
+        <hr/>
+    <% } %>
+        <%- content %>
+
+    URL: <a id="reader-domain" href="<%= metadata.url %>">
+    <span><%= metadata.url %></span>
+</a><br><span></span>
+</div>
+<script type="application/javascript">
+  <%- config_js %>
+  <%- index_js %>
+</script>
+</body>
+</html>

@@ -14,6 +14,16 @@ const {sentimentRate} = require('./routines/analysis');
 const {getContentFromBrowser} = require("./routines/content");
 const {getContentEmbedded, getContentAndMetadataEmbedded} = require("./routines/bundler")
 
+
+const config_js = fs.readFileSync('static/config.js', {encoding: 'utf-8'})
+const fontello_css = fs.readFileSync('static/fontello.css', {encoding: 'utf-8'})
+const index_css = fs.readFileSync('static/index.css', {encoding: 'utf-8'})
+const index_js = fs.readFileSync('static/index.js', {encoding: 'utf-8'})
+const mini_dark = fs.readFileSync('node_modules/mini.css/dist/mini-dark.min.css')
+const mini_default = fs.readFileSync('node_modules/mini.css/dist/mini-default.min.css')
+const mini_nord = fs.readFileSync('node_modules/mini.css/dist/mini-nord.min.css')
+const mili = fs.readFileSync('node_modules/milligram/dist/milligram.min.css')
+
 const argv = require('yargs')
   .usage('Usage: $0 <command> [options]')
   .command('relevant', 'The permafeed indexer')
@@ -271,6 +281,58 @@ const init = async () => {
 
   server.route({
     method: 'GET',
+    path: '/preview',
+    handler: async (request, h) => {
+      try{
+        let sites = db.collection('entries');
+        let site_raw = request.query.site;
+        let parser = request.query.parser;
+        let mode = request.query.mode || 'sepia';
+        let reset = request.query.reset === 'on';
+        let libstyle = request.query.libstyle === 'on';
+        let header = request.query.header === 'on';
+        let format = request.query.format || 'html';
+        let engine = request.query.engine || 'browser';
+        let obj_site = parse(site_raw);
+        let domain = obj_site.host;
+
+        if (domain === '' || domain === undefined) {
+          return Boom.badData('Url format must be protocol://domain/path');
+        }
+
+        const address = await arweave.wallets.jwkToAddress(wallet);
+        let {resultArticle, resultMetadata} = await getContentAndMetadataEmbedded(site_raw, parser, format, engine);
+        let stats = readingTime(resultArticle.content)
+
+        return h.view('template', {
+          header,
+          address,
+          config_js,
+          fontello_css,
+          index_css,
+          index_js,
+          mini_dark,
+          mini_default,
+          mini_nord,
+          mini: libstyle,
+          mili,
+          reset,
+          libstyle,
+          stats,
+          mode,
+          content: resultArticle.content,
+          metadata: resultMetadata,
+          author: resultMetadata.author || ""
+        });
+      } catch(e){
+        console.log(e);
+        return Boom.badImplementation(`${e}`);
+      }
+    }
+  });
+
+  server.route({
+    method: 'GET',
     path: '/request',
     handler: async (request, reply) => {
       try{
@@ -289,11 +351,13 @@ const init = async () => {
         let site = await sites.findOne({url: site_raw});
         if (site === null) {
           let {resultArticle, resultMetadata} = await getContentAndMetadataEmbedded(site_raw, parser, format, engine);
+          let stats = readingTime(resultArticle.content)
 
           return {
             status: 'ok',
             data: resultArticle,
-            metadata: resultMetadata
+            metadata: resultMetadata,
+            stats
           };
         } else {
           console.log('** URL Saved');
