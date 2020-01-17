@@ -41,16 +41,27 @@ Under [MIT LICENSE](/LICENSE)
 
 ### Functional Requirements
 - [X] Users are able to paste in a URL and see a preview of the readable content.
+
 See the next element to more info.
+
 - [X] Users are able to publish the readable content to the permaweb and get back a permaweb link.
+
 1. Access to the root page
+
 ![screenshots](/screenshots/home-mobile.jpg)
+
 2. Get a preview and tune the page
+
 ![screenshots](/screenshots/preview-mobile.jpg)
+
 3. Agree the conditions
+
 ![screenshots](/screenshots/ag-mobile.jpg)
+
 4. Go to status page for each store request and wait until you page is mined, you get permaweb link
+
 ![screenshots](/screenshots/waiting.jpg)
+
 ![screenshots](/screenshots/deployed.jpg)
 
 Desktop, tablet and mobile devices are supoorted by the interface.
@@ -66,9 +77,11 @@ Favicon, thumbnail are deployed is its own transaction due to render and spec li
 
 ![screenshots](/screenshots/fb.png)
 ![screenshots](/screenshots/twitter.png)
+
 - [X] The original URL must be included in the tag of the transaction. Other metadata included in tags is a plus.
 
 Reading time, Sentiment analisis, and the URL are included as tags:
+
 ![screenshots](/screenshots/tags.png)
 
 
