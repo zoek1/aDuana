@@ -27,7 +27,7 @@
     "cloudscraper": "^4.5.0",
     "cron": "^1.7.2",
     "domino": "^2.1.4",
-    "dompurify": "^2.0.7",
+    "dompurify": "^2.0.17",
     "ejs": "^3.0.1",
     "handlebars": "^4.5.3",
     "html-minifier": "^4.0.0",
