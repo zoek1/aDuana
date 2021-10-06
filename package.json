@@ -47,7 +47,7 @@
     "rss-parser": "^3.7.3",
     "sentiment": "^5.0.2",
     "stopword": "^0.3.4",
-    "url-parse": "^1.4.7",
+    "url-parse": "^1.5.2",
     "yargs": "^15.0.2"
   }
 }
